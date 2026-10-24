@@ -40,7 +40,7 @@ def calculate_slot_overlap(car_box, slot_box):
 @app.get("/api/parking-status")
 def get_parking_status():
   
-  image_path = "test1.jpg"
+  image_path = "cropgedq.jpg"
   results = model.predict(source=image_path, conf=0.35, save=False)[0]
 
   car_boxes = []

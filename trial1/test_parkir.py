@@ -8,11 +8,11 @@ model = YOLO('best_3.pt')
 
 # 2. Lakukan prediksi pada foto uji di komputer lokal
 results = model.predict(
-    source='test5.jpg',  # Pastikan file foto ada di folder proyek atau isi path lengkapnya
+    source='tes_gedq2.jpg',  # Pastikan file foto ada di folder proyek atau isi path lengkapnya
     conf=0.4,            # Batas minimum confidence score (40%)
     show=False,          # Di VS Code lokal, biasanya 'show=True' butuh jendela GUI terpisah, jadi lebih aman pakai False lalu simpan hasilnya
     save=True,            # Menyimpan hasil gambar ber-bounding box
-    imgsz = 1024
+    imgsz = 640
 )
 
 # 3. Menampilkan Laporan / Rekap Status Parkir yang Rapi
