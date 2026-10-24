@@ -4,14 +4,15 @@ from collections import Counter
 
 # 1. Load model terbaik (best.pt) yang sudah didownload dari Colab
 # Taruh file best.pt di dalam folder yang sama atau tentukan path-nya
-model = YOLO('best.pt')
+model = YOLO('best_3.pt')
 
 # 2. Lakukan prediksi pada foto uji di komputer lokal
 results = model.predict(
-    source='test2.jpg',  # Pastikan file foto ada di folder proyek atau isi path lengkapnya
+    source='test5.jpg',  # Pastikan file foto ada di folder proyek atau isi path lengkapnya
     conf=0.4,            # Batas minimum confidence score (40%)
     show=False,          # Di VS Code lokal, biasanya 'show=True' butuh jendela GUI terpisah, jadi lebih aman pakai False lalu simpan hasilnya
-    save=True            # Menyimpan hasil gambar ber-bounding box
+    save=True,            # Menyimpan hasil gambar ber-bounding box
+    imgsz = 1024
 )
 
 # 3. Menampilkan Laporan / Rekap Status Parkir yang Rapi

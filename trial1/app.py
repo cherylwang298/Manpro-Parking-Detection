@@ -15,7 +15,7 @@ app.add_middleware(
 )
 
 
-model = YOLO("best_1.pt")
+model = YOLO("best_3.pt")
 with open("slots_config.json", "r") as f:
   SLOTS = json.load(f)
 
