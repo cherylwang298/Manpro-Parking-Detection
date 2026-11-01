@@ -1,3 +1,9 @@
 model yg dipake: best_1
 foto yang dipake buat trial: test1
+<<<<<<< HEAD
 slots_config nyimpen hasil config nya test1
+=======
+slots_config nyimpen hasil config nya test1
+
+installation: pip install fastapi uvicorn ultralytics opencv-python
+>>>>>>> 5e7045e7 (fix: anomaly detection)
