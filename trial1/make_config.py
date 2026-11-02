@@ -2,7 +2,7 @@ import json
 import cv2
 
 # Load gambar latar belakang area parkir kampusmu
-img_path = 'test1.jpg'  # Pastikan foto ini ada di folder proyek
+img_path = 'cropgedq.jpg'  # Pastikan foto ini ada di folder proyek
 img = cv2.imread(img_path)
 
 if img is None:

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Parking Dashboard - Denah Lapangan Parkir (9 Slot)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .slot-card {
+            transition: all 0.3s ease;
+        }
+        /* Grid kustom untuk 9 kolom horizontal */
+        .grid-cols-9 {
+            grid-template-columns: repeat(9, minmax(0, 1fr));
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans p-6 min-h-screen">
+
+    <div class="max-w-7xl mx-auto space-y-6">
+        
+        <!-- Header -->
+        <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                    <span>🅿️</span> Monitoring Lapangan Parkir Kampus
+                </h1>
+                <p class="text-sm text-gray-400 mt-1">Real-time Layout & Spatial Mapping</p>
+            </div>
+            <div class="text-right">
+                <span id="last-updated" class="text-xs font-mono bg-gray-700 px-3 py-1.5 rounded-md text-emerald-400 border border-gray-600">
+                    Updating...
+                </span>
+            </div>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-gray-800 p-5 rounded-xl border-l-4 border-blue-500 shadow-md">
+                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Total Kapasitas</p>
+                <h3 id="total-slots" class="text-3xl font-bold text-white mt-1">0</h3>
+            </div>
+            <div class="bg-gray-800 p-5 rounded-xl border-l-4 border-emerald-500 shadow-md">
+                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Slot Kosong</p>
+                <h3 id="empty-slots" class="text-3xl font-bold text-emerald-400 mt-1">0</h3>
+            </div>
+            <div class="bg-gray-800 p-5 rounded-xl border-l-4 border-rose-500 shadow-md">
+                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Slot Terisi</p>
+                <h3 id="occupied-slots" class="text-3xl font-bold text-rose-400 mt-1">0</h3>
+            </div>
+            <div class="bg-gray-800 p-5 rounded-xl border-l-4 border-amber-500 shadow-md">
+                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Anomali / Peringatan</p>
+                <h3 id="anomaly-slots" class="text-3xl font-bold text-amber-400 mt-1">0</h3>
+            </div>
+        </div>
+
+        <!-- Denah Tempat Parkir (Layout 9 Kolom Kesamping) -->
+        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <span>🗺️</span> Denah Area Parkir Utama (9 Slot Kesamping)
+                </h2>
+
+                <!-- Legenda Warna -->
+                <div class="flex items-center space-x-4 text-xs">
+                    <div class="flex items-center space-x-1.5">
+                        <span class="w-3 h-3 rounded-full bg-emerald-500 border border-emerald-300"></span>
+                        <span class="text-gray-300">Kosong</span>
+                    </div>
+                    <div class="flex items-center space-x-1.5">
+                        <span class="w-3 h-3 rounded-full bg-rose-500 border border-rose-300"></span>
+                        <span class="text-gray-300">Terisi</span>
+                    </div>
+                    <div class="flex items-center space-x-1.5">
+                        <span class="w-3 h-3 rounded-full bg-amber-500 border border-amber-300 animate-pulse"></span>
+                        <span class="text-gray-300">Anomali</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Layout Denah Parkiran -->
+            <div class="bg-gray-950 p-6 rounded-lg border border-gray-800 space-y-4">
+                
+                <!-- ROW 1: Slot A1 - A9 -->
+                <div>
+                    <p class="text-[11px] font-semibold text-gray-500 mb-2 uppercase tracking-widest text-center">--- Baris Atas (Slot A1 - A9) ---</p>
+                    <div id="row-1" class="grid grid-cols-9 gap-2">
+                        <!-- Render A1-A9 via JS -->
+                    </div>
+                </div>
+
+                <!-- ROW 2: Slot A10 dan seterusnya (jika ada) -->
+                <div>
+                    <p class="text-[11px] font-semibold text-gray-500 mb-2 uppercase tracking-widest text-center">--- Baris Bawah (Slot A10+) ---</p>
+                    <div id="row-2" class="grid grid-cols-9 gap-2">
+                        <!-- Render A10+ via JS -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        async function fetchParkingStatus() {
+            try {
+                const response = await fetch('http://localhost:8000/api/parking-status');
+                const data = await response.json();
+
+                // Update Ringkasan Angka Metric
+                document.getElementById('total-slots').innerText = data.summary.total;
+                document.getElementById('empty-slots').innerText = data.summary.empty;
+                document.getElementById('occupied-slots').innerText = data.summary.occupied;
+                document.getElementById('anomaly-slots').innerText = data.summary.anomaly;
+                document.getElementById('last-updated').innerText = 'UPDATED: ' + new Date().toLocaleTimeString();
+
+                const row1Container = document.getElementById('row-1');
+                const row2Container = document.getElementById('row-2');
+                
+                row1Container.innerHTML = '';
+                row2Container.innerHTML = '';
+
+                data.slots.forEach(slot => {
+                    let bgColor, textColor, statusText, icon;
+
+                    if (slot.status === 'empty') {
+                        bgColor = 'bg-emerald-950/80 border-emerald-500/60 hover:border-emerald-400';
+                        textColor = 'text-emerald-400';
+                        statusText = 'KOSONG';
+                        icon = '🟩';
+                    } else if (slot.status === 'occupied') {
+                        bgColor = 'bg-rose-950/80 border-rose-500/60 hover:border-rose-400';
+                        textColor = 'text-rose-400';
+                        statusText = 'TERISI';
+                        icon = '🚗';
+                    } else {
+                        bgColor = 'bg-amber-950/80 border-amber-500/60 animate-pulse';
+                        textColor = 'text-amber-400';
+                        statusText = 'ANOMALI';
+                        icon = '⚠️';
+                    }
+
+                    const cardHTML = `
+                        <div class="slot-card p-2 rounded-lg border-2 ${bgColor} flex flex-col justify-between items-center h-28 shadow-md">
+                            <span class="text-[11px] font-bold text-gray-300 bg-gray-900/80 px-1.5 py-0.5 rounded border border-gray-700">${slot.label}</span>
+                            <span class="text-xl my-1">${icon}</span>
+                            <span class="text-[9px] font-black px-1.5 py-0.5 rounded tracking-wider ${textColor} bg-gray-900 border border-gray-800">
+                                ${statusText}
+                            </span>
+                        </div>
+                    `;
+
+                    // Pembagian 9 slot kesamping: ID 1-9 ke Baris 1, Sisanya (10+) ke Baris 2
+                    if (slot.id <= 9) {
+                        row1Container.innerHTML += cardHTML;
+                    } else {
+                        row2Container.innerHTML += cardHTML;
+                    }
+                });
+
+            } catch (error) {
+                console.error("Gagal mengambil data dari server Python:", error);
+            }
+        }
+
+        fetchParkingStatus();
+        setInterval(fetchParkingStatus, 3000);
+    </script>
+</body>
+</html>
